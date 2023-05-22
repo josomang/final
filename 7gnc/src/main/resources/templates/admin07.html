@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>성남시 공공도서관 AR서비스</title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <link rel="stylesheet" type="text/css" href="css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/board.css" />
+    <link rel="stylesheet" type="text/css" href="css/color.css" />
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css" />
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/date.js"></script>
+    <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="nav">
+        <div class="logo">ADMIN</div>
+        <ul>
+            <li>
+                <input type="checkbox" id="menu01">
+                <label for="menu01">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    화상 교육 참여 인원</label>
+                <ul class="submenu" style="display: block;">
+                    <li><a th:href="@{/admin}">수업목록</a></li>
+                    <li><a th:href="@{/center}">돌봄센터</a></li>
+                </ul>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">group</span>
+                <a th:href="@{/ar}">AR 공간 이용자 수</a>
+            </li>
+            <li class="on">
+                <span class="material-symbols-outlined">tablet_android</span>
+               <a th:href="@{/device}">AR 디바이스현황</a>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">sentiment_satisfied</span>
+               <a th:href="@{/satisfaction}">이용자 만족도</a>
+            </li>
+            <li>
+                <input type="checkbox" id="menu04">
+                <label for="menu04">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    성과지표통계</label>
+                <ul class="submenu" style="display: block;">
+                    <li><a th:href="@{/statistics}">성과지표통계</a></li>
+                    <li><a th:href="@{/goals}">목표설정</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div><!-- //nav -->
+    <div class="section">
+        <div class="header">
+            <button type="button" onclick="logOut()">로그아웃</button>
+        </div>
+        <div class="inner">
+            <h1>AR 디바이스 현황</h1>
+
+            <div class="area_table">
+
+                <div class="tablehead">
+                    <div class="searchbox">
+                        <input type="text" id="keyword" placeholder="시리얼번호" autocomplete="off" autofocus />
+                        <label style="display: none;" for="keyword">시리얼번호</label>
+                        <button type="button" class="btn_basic" onclick="search()">검색</button>
+                    </div>
+                    <div class="btn_area">
+                        <button type="button" class="btn_save">등록</button>
+                    </div>
+                </div>
+
+                <table>
+                <caption style="display: none;">AR디바이스 현황</caption>
+                    <colgroup>
+                    <col width="100px">
+                    <col width="">
+                    <col width="200px">
+                    <col width="200px">
+                    <col width="300px">
+                    <col width="200px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>시리얼번호</th>
+                            <th>타입</th>
+                            <th>상태</th>
+                            <th>메모</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tt , iterator : ${device}">
+                            <td th:text="${pageDTO.totalCount - (((pageDTO.page-1) * pageDTO.rowPerPage)+iterator.index)}"></td>
+                            <td><span th:text="${tt.AR_DEVICE_SN}"></span></td>
+                            <td><span th:text="${tt.AR_DEVICE_TYPE}"></span></td>
+                            <td><span th:text="${tt.AR_DEVICE_STTS}"></span></td>
+                            <td><span th:text="${tt.AR_DEVICE_MEMO}"></span></td>
+                            <td>
+                                <button type="button" class="btn_basic" th:myName="${tt.AR_DEVICE_ID}"
+                                onclick="idSend(this.getAttribute('myName'))">수정</button>
+                                <button type="button" class="btn_basic" th:myName="${tt.AR_DEVICE_ID}"
+                                onclick="deleteSend(this.getAttribute('myName'))">삭제</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+       <div class="paging" th:style="${all== 0? 'display:none':'display:block'}">
+                   <ul class="pagination pagination-sm no-margin pull-right">
+						<span class="before" th:if="${pageMaker.prev} == true">
+							<a th:href="@{/device(page=${pageMaker.startPage}-1,
+					perPageNum=${pageMaker.cri.perPageNum})}">&laquo;</a>
+						</span>
+						<span class="current" th:each="idx,iterStat : 
+					${#numbers.sequence(pageMaker.startPage,pageMaker.endPage)}"
+							th:classappend="${pageMaker.cri.page} == ${idx} ? active : null">
+							<a th:href="@{/device(page=${idx},perPageNum=${pageMaker.cri.perPageNum})}"
+								th:text="${idx}"></a>
+						</span>
+
+						<span class="next" th:if="${pageMaker.next} == true and 
+					${pageMaker.endPage > 0}">
+							<a th:href="@{/device(page=${pageMaker.endPage}+1,
+					perPageNum=${pageMaker.cri.perPageNum})}">&raquo;</a>
+						</span>
+					</ul>
+                </div>
+
+            </div><!-- //area_table -->
+
+        </div><!-- //inner -->
+
+        <!-- 디바이스 등록/수정 -->
+        <div class="popup_layer" style="display: none;">
+            <div class="popup_box">
+                <h1>디바이스 등록
+                    <button type="button" class="btn_close"><span class="material-symbols-outlined">close</span></button>
+                </h1>
+                <div class="tablebox">
+                    <table class="table_listview">
+                    <caption style="display: none;">디바이스 등록</caption>
+                        <colgroup>
+                            <col width="120px">
+                            <col width="auto">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th>시리얼번호*</th>
+                                <td><input type="text" class="input_200" id="number" autocomplete="off">
+                                <label style="display: none;" for="number">시리얼번호입력</label></td>
+                            </tr>
+                            <tr>
+                                <th>타입*</th>
+                                <td>
+                                <label style="display: none;" for="type_value">타입입력</label>
+                                    <select id="type_value" name="type_value">
+                                        <option>서피스</option>
+                                        <option>갤럭시탭</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>상태*</th>
+                                <td>
+                                <label style="display: none;" for="condition">상태입력</label>
+                                    <select id="condition" name="condition">
+                                        <option>정상</option>
+                                        <option>분실</option>
+                                        <option>고장</option>
+                                        <option>수리중</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>디바이스설명(메모)</th>
+                                <td><textarea id="memo"></textarea>
+                                <label style="display: none;" for="memo">상태입력</label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="btn">
+                    <button type="button" class="btn_delete">취소</button>
+                    <button type="button" class="btn_save" onclick="dataSend()">확인</button>
+                </div>
+            </div>
+        </div><!--// popup -->
+
+    </div><!-- //section -->
+</body>
+<script th:inline="javascript">
+	// Get the modal
+	let modal = document.getElementsByClassName("popup_layer")[0];
+	let modal2 = document.getElementsByClassName("btn")[0];
+	// Get the <span> element that closes the modal
+	let btn_close = document.getElementsByClassName("btn_close")[0];
+	let btn_close2 = document.getElementsByClassName("btn_delete")[0];
+	let btn_open = document.getElementsByClassName("btn_save")[0];
+
+
+	btn_open.onclick = function () {
+		modal.style.display = "block";
+
+	}
+
+	btn_close2.onclick = function () {
+		modal.style.display = "none";
+		setTimeout("location.reload()", 100);
+	}
+	// When the user clicks on <span> (x), close the modal
+	btn_close.onclick = function () {
+		modal.style.display = "none";
+		setTimeout("location.reload()", 100);
+	}
+	
+	
+
+	function dataSend() {
+		var result = confirm("등록하시겠습니까?");
+		if(result){
+		var number = $("#number").val();
+		
+	var t = document.getElementById("type_value")
+		var type = t.options[t.selectedIndex].text
+		
+		var c = document.getElementById("condition")
+		var condition = c.options[c.selectedIndex].text
+		
+		var memo = $("#memo").val();
+		
+		
+
+		if (number == "") {
+			alert("시리얼 넘버를 입력하세요")
+		}
+		else {
+			var CenterDto = JSON.stringify({
+				number: number,
+				type: type,
+				condition: condition,
+				memo: memo,
+			
+			});
+
+
+			$.ajax({
+				method: 'POST',
+				url: '/device-register',
+				headers: {'Content-type': 'application/json'},
+				data: CenterDto,
+				success: function(data){
+					  modal.style.display = "none";
+		setTimeout("location.reload()", 1000);
+   
+    },
+     error:function(request,status,error){
+        alert("해당 시리얼 넘버가 존재합니다"); // 실패 시 처리
+       
+       }
+     
+
+			})
+      
+		}
+     }
+	}
+	
+	
+	
+	function idSend(number) {
+		
+		
+	window.open('device-update-modal'+'?'+'number='+number, 'update',
+						'top=250, left=500, width=1000, height=400, status=no, menubar=no, toolbar=no, resizable=no');
+	
+
+		}
+
+	function deleteSend(number) {
+		
+		var result = confirm("정말로 삭제하시겠습니까?");
+
+		if (result) {
+			$.ajax({
+				method: 'POST',
+				url: '/device-delete',
+				headers: {'Content-type': 'application/json'},
+				data: number
+			})	
+		setTimeout("location.reload()", 1000);
+		}
+		
+      
+	}
+	
+	function search() {
+		var keyword = $("#keyword").val();
+
+	
+		location.href='device-search'+'?'+'keyword='+keyword
+	
+
+	}
+
+	
+
+</script>
+
+<script>
+	function logOut(){
+		var logout = confirm("로그아웃하시겠습니까?");
+		if(logout){
+		$.ajax({
+				method: 'POST',
+				url: '/logout'
+				
+
+
+			})
+			location.replace('/login');
+		}
+		else {
+			location.reload();
+		}
+		
+	}
+</script>
+
+</ht>

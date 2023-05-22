@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>성남시 공공도서관 AR서비스</title>
+	<meta name="viewport"
+		content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="css/common.css" />
+	<link rel="stylesheet" type="text/css" href="css/layout.css" />
+	<link rel="stylesheet" type="text/css" href="css/board.css" />
+	<link rel="stylesheet" type="text/css" href="css/color.css" />
+	<link rel="stylesheet" type="text/css" href="css/datepicker.css" />
+	<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	
+
+	<!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+<script src='js/main.js'></script>
+<script>
+
+$.ajax({
+    		url: 'ar-list',
+    		type: 'GET',
+			dataType: "json",
+    		success: function(data){
+    			
+     			var calendarEl = document.getElementById('calendar');
+    			
+    			var events = data.map(function(item) {
+    				
+    				return {
+						title : item.title,
+						start : item.dd,
+						color: "red"
+					} //return
+					
+    			});//events
+    			
+    			
+				var calendar = new FullCalendar.Calendar(calendarEl, {
+					events : events,
+					contentHeight: 600,
+					 headerToolbar: {
+    left: 'prev',
+    center: 'title',
+    right: 'next'
+  },//headerTollbar 
+					titleFormat: function (date) {
+      year = date.date.year;
+      month = date.date.month + 1;
+     
+     var test =JSON.stringify({
+				year: year,
+				month: month,
+				
+			});
+     
+  
+
+	$(function getGraph() {
+		let timeList = ['1','','','','5','','','','',
+		'10','','','','','15','','','','','20','','','','','25'
+		,'','','','','30',''];
+		let posList = [];
+		
+		$.ajax({
+			type: "POST",
+			url: "/monthAll",
+			headers: {'Content-type': 'application/json'},
+			data: test,
+			dataType: "json",
+			success: function (data) {
+				
+				
+				for(let i = 0; i< data.length;  i++){
+			posList.push(data[i]);		
+				}//for
+				
+	if(window.chartObj != undefined){
+		window.chartObj.destroy();
+	}
+				
+		window.chartObj  =		new Chart(
+					document.getElementById("myChart"), 
+					
+					{
+					type: 'bar',
+					data: {
+						labels: timeList, // X축 
+						datasets: [{
+							label:"이용자수",
+							data: posList, // 값
+							backgroundColor:  'rgb(150,205,236)',
+							fill: false
+						}]//datasets
+					},//data
+					options: {
+
+					}//option
+				}); //new chart
+				
+				
+			},
+		
+
+		}) // 그래프 ajax	  
+	}) // getGraph
+      
+      $.ajax({
+				method: 'POST',
+				url: '/month-sum',
+				headers: {'Content-type': 'application/json'},
+				data: test,
+				success: function (data) {
+					
+					  $(".year_mon2").text(year + "년 " + month + "월 이용자 수 : "+ data);
+				}
+			
+			})
+
+      
+      
+    
+      
+      
+      
+      return year + "년 " + month + "월";
+    }, //타이틀 포멧
+				dateClick: function(info)
+    	{//클릭이벤트 시작 
+
+scr_width = screen.availWidth;
+					scr_height = screen.availHeight;
+
+    	window.open('popup'+'?'+'date='+info.dateStr, 'popup',
+						'top=300, left=500, width=900, height=550, status=no, menubar=no, toolbar=no, resizable=no');
+    	}//클릭이벤트
+				
+				
+				
+				});//calendar
+				
+				calendar.render();
+    		
+    		
+    		},//success
+    	
+    	
+    	});//ajax
+
+
+
+</script>
+</head>
+
+<body>
+	<div class="nav">
+		<div class="logo">ADMIN</div>
+		 <ul>
+            <li>
+                <input type="checkbox" id="menu01">
+                <label for="menu01">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    화상 교육 참여 인원</label>
+                <ul class="submenu" style="display: block;">
+                    <li><a th:href="@{/admin}">수업목록</a></li>
+                    <li><a th:href="@{/center}">돌봄센터</a></li>
+                </ul>
+            </li>
+            <li class="on">
+                <span class="material-symbols-outlined">group</span>
+                <a th:href="@{/ar}">AR 공간 이용자 수</a>
+            </li>
+              <li>
+                <span class="material-symbols-outlined">tablet_android</span>
+                <a th:href="@{/device}">AR 디바이스현황</a>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">sentiment_satisfied</span>
+                <a th:href="@{/satisfaction}">이용자 만족도</a>
+            </li>
+            <li>
+                <input type="checkbox" id="menu04">
+                <label for="menu04">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    성과지표통계</label>
+                <ul class="submenu" style="display: block;">
+                   <li><a th:href="@{/statistics}">성과지표통계</a></li>
+                    <li><a th:href="@{/goals}">목표설정</a></li>
+                </ul>
+            </li>
+        </ul>
+	</div><!-- //nav -->
+
+
+	<div class="section">
+		<div class="header">
+			<button type="button" onclick="logOut()">로그아웃</button>
+		</div>
+		<div class="inner">
+			<h1>AR 이용 통계</h1>
+		
+			<div class="cal_box">
+				
+				<div id="calendar"></div>
+				
+			</div><!-- //cal -->
+
+			<div class="chart">
+				<h2>
+					<span class="year_mon2"> </span>
+					<span class="total"></span>
+				</h2>
+
+
+				<canvas id="myChart"></canvas>
+
+
+			</div>
+			<!--// inner -->
+
+
+		</div><!-- //section -->
+</body>
+<script>
+	let modal = document.getElementsByClassName("popup_layer")[0];
+	let btn_open = document.getElementsByClassName("btn_save")[0];
+	let btn_close = document.getElementsByClassName("btn_close")[0];
+
+	
+
+	
+
+
+
+	function linkOpen() {
+		modal.style.display = "block";
+	}
+
+
+
+
+</script>
+
+<script>
+	function logOut() {
+		var logout = confirm("로그아웃 하시겠습니까?");
+
+		if (logout) {
+			$.ajax({
+				method: 'POST',
+				url: '/logout'
+
+
+
+			})
+			location.replace('/login');
+		}
+		else {
+			location.reload();
+		}
+
+	}
+</script>
+<script type="text/javascript">
+
+	
+
+</script>
+
+
+</html>

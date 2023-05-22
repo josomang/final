@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gnc.dao.LessonsDao">
+   <!-- 수업등록 -->
+   <insert id="registerDao">
+      insert into TBL_LESSONS(LESSON_TTL,BGNG_DT,END_DT,LESSON_TM,ROOM_ID,INSTR_NM,LESSON_TYPE,LESSON_DESC)
+      values
+      (#{param1},#{param2},#{param3},#{param4},#{param5},#{param6},#{param7},#{param8})
+    </insert>
+   
+   
+    <update id="surveyUpdateDao">
+    update TBL_LESSON_CENTER set DGSTFN_SCORE=#{DGSTFN_SCORE} where LESSON_CENTER_ID = #{LESSON_CENTER_ID}
+    </update>
+    
+    <update id="updateDao">
+    update TBL_LESSONS set LESSON_TTL = #{LESSON_TTL}, BGNG_DT = #{BGNG_DT}, 
+    END_DT = #{END_DT},ROOM_ID = #{ROOM_ID}, LESSON_TM = #{LESSON_TM} , 
+    INSTR_NM = #{INSTR_NM} ,LESSON_TYPE= #{LESSON_TYPE},
+    LESSON_DESC=#{LESSON_DESC},UPDT_DT=#{UPDT_DT} where LESSON_ID = #{LESSON_ID}
+    </update>
+    
+    
+    <update id="deleteDao" >
+		 update TBL_LESSONS set DEL_DT= #{DEL_DT} where LESSON_ID = #{LESSON_ID}
+	</update>
+
+<select id="lessonsListDao" resultType="com.gnc.dto.LessonsDto" parameterType="string"> 
+select TBL_LESSONS.LESSON_ID,BGNG_DT,sum(NOPE) as NOPE, LESSON_TTL, INSTR_NM , LESSON_TYPE,count(CENTER_ID) as center ,(sum(DGSTFN_SCORE)/count(DGSTFN_SCORE)) as DGSTFN_SCORE
+ from TBL_LESSONS LEFT JOIN TBL_LESSON_CENTER ON TBL_LESSONS.LESSON_ID = TBL_LESSON_CENTER.LESSON_ID where DEL_DT IS NULL GROUP BY(TBL_LESSONS.LESSON_ID) order by TBL_LESSONS.BGNG_DT desc LIMIT ${pageStart}, ${perPageNum}
+	</select>
+	
+	<select id="surveyLessonsListDao" resultType="com.gnc.dto.LessonsDto" parameterType="string"> 
+select * from TBL_LESSON_CENTER LEFT JOIN TBL_LESSONS ON TBL_LESSON_CENTER.LESSON_ID = TBL_LESSONS.LESSON_ID where CENTER_ID = #{CENTER_ID} and DGSTFN_SCORE is null
+	</select>
+	
+
+	
+		<select id="searchDao" resultType="com.gnc.dto.LessonsDto" parameterType="string">
+		select   TBL_LESSONS.LESSON_ID,BGNG_DT,sum(NOPE) as NOPE, LESSON_TTL, INSTR_NM , LESSON_TYPE,count(CENTER_ID) as center, (sum(DGSTFN_SCORE)/count(DGSTFN_SCORE)) as DGSTFN_SCORE
+ from TBL_LESSONS LEFT JOIN TBL_LESSON_CENTER ON
+ TBL_LESSONS.LESSON_ID = TBL_LESSON_CENTER.LESSON_ID where LESSON_TTL LIKE CONCAT('%',#{keyword},'%') and DEL_DT IS NULL GROUP BY(TBL_LESSONS.LESSON_ID) order by TBL_LESSONS.BGNG_DT desc LIMIT ${pageStart}, ${perPageNum}
+	</select>
+
+	<select id="centerLessonsListDao" resultType="com.gnc.dto.CenterDto"> 
+		select * from TBL_LESSON_CENTER LEFT JOIN TBL_CENTERS ON TBL_LESSON_CENTER.CENTER_ID = TBL_CENTERS.CENTER_ID where LESSON_ID = #{LESSON_ID}
+	</select>
+	
+			<select id="TtlDao" resultType="com.gnc.dto.LessonsDto">
+select LESSON_TTL,date_format(BGNG_DT,'%Y-%m-%d') as BGNG_DT  from TBL_LESSONS LEFT JOIN TBL_LESSON_CENTER ON TBL_LESSONS.LESSON_ID = TBL_LESSON_CENTER.LESSON_ID where LESSON_CENTER_ID = #{LESSON_CENTER_ID}
+	</select>
+	
+<select id="test" resultType="com.gnc.dto.LessonsDto" parameterType="string" >
+		 select LESSON_ID,BGNG_DT, LESSON_TTL, INSTR_NM , LESSON_TYPE from TBL_LESSONS order by LESSON_ID desc
+	</select>
+	
+<select id="getCount" resultType="int">
+    SELECT count(*) FROM TBL_LESSONS where DEL_DT IS NULL
+</select>
+
+<select id="getSearchCount" resultType="int">
+    SELECT count(*) FROM TBL_LESSONS where LESSON_TTL LIKE CONCAT('%',#{keyword},'%') and DEL_DT IS NULL
+</select>
+	
+	<select id="lessonsDao" resultType="com.gnc.dto.LessonsDto">
+		select LESSON_ID,LESSON_TTL,BGNG_DT,END_DT,LESSON_TM,ROOM_ID,INSTR_NM,LESSON_TYPE,LESSON_DESC from TBL_LESSONS where LESSON_ID = #{LESSON_ID}
+	</select>
+	
+		<select id="getIdDao" resultType="int">
+		select LESSON_ID from TBL_LESSONS
+	</select>
+	
+	
+<select id="lect_listDao" resultType="com.gnc.dto.lect_listDto">
+	select TBL_LESSONS.LESSON_ID as lecture_id , date_format(TBL_LESSONS.BGNG_DT,'%Y%m%d%H%i') as bgng_dt , date_format(TBL_LESSONS.END_DT,'%Y%m%d%H%i') as end_dt , TBL_LESSONS.ROOM_ID as room_id  from TBL_LESSON_CENTER RIGHT JOIN TBL_LESSONS ON TBL_LESSON_CENTER.LESSON_ID = TBL_LESSONS.LESSON_ID where TBL_LESSON_CENTER.CENTER_ID IS NULL and TBL_LESSONS.END_DT &lt; NOW() and TBL_LESSONS.DEL_DT IS NULL 
+	</select>
+<select id="totalCountDao" resultType="integer">
+select sum(NOPE) from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID}
+	</select>
+<select id="centerCountDao" resultType="integer">
+select count(CENTER_ID) from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID}
+	</select>	
+<select id="surveyDao" resultType="integer">
+select sum(DGSTFN_SCORE)/count(DGSTFN_SCORE) from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID}
+	</select>	
+	<select id="getCountAll" resultType="int">
+select  count(DGSTFN_SCORE) from TBL_LESSON_CENTER LEFT JOIN TBL_LESSONS ON
+ TBL_LESSON_CENTER.LESSON_ID = TBL_LESSONS.LESSON_ID where TBL_LESSONS.BGNG_DT LIKE CONCAT('%',#{year},'%') and TBL_LESSONS.DEL_DT IS NULL 
+	</select>	
+	<select id="sumAll" resultType="int">
+select sum(DGSTFN_SCORE) from TBL_LESSON_CENTER LEFT JOIN TBL_LESSONS ON
+ TBL_LESSON_CENTER.LESSON_ID = TBL_LESSONS.LESSON_ID where TBL_LESSONS.BGNG_DT LIKE CONCAT('%',#{year},'%') and TBL_LESSONS.DEL_DT IS NULL 
+	</select>		
+	
+
+ 
+
+</mapper>

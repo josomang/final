@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>성남시 공공도서관 AR서비스</title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <link rel="stylesheet" type="text/css" href="css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/board.css" />
+    <link rel="stylesheet" type="text/css" href="css/color.css" />
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css" />
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/date.js"></script>
+    <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="nav">
+        <div class="logo">ADMIN</div>
+         <ul>
+            <li>
+                <input type="checkbox" id="menu01">
+                <label for="menu01">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    화상 교육 참여 인원</label>
+                <ul class="submenu" style="display: block;">
+                    <li><a th:href="@{/admin}">수업목록</a></li>
+                    <li><a th:href="@{/center}">돌봄센터</a></li>
+                </ul>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">group</span>
+                <a th:href="@{/ar}">AR 공간 이용자 수</a>
+            </li>
+              <li>
+                <span class="material-symbols-outlined">tablet_android</span>
+               <a th:href="@{/device}">AR 디바이스현황</a>
+            </li>
+            <li class="on">
+                <span class="material-symbols-outlined">sentiment_satisfied</span>
+                <a th:href="@{/satisfaction}">이용자 만족도</a>
+            </li>
+            <li>
+                <input type="checkbox" id="menu04">
+                <label for="menu04">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    성과지표통계</label>
+                <ul class="submenu" style="display: block;">
+                   <li><a th:href="@{/statistics}">성과지표통계</a></li>
+                    <li><a th:href="@{/goals}">목표설정</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div><!-- //nav -->
+    <div class="section">
+        <div class="header">
+            <button type="button" onclick="logOut()">로그아웃</button>
+        </div>
+        <div class="inner">
+            <h1>이용자 만족도</h1>
+
+            <div class="area_table">
+                <div class="tablehead">
+                    <div class="searchbox">
+                    <label style="display: none;" for="select_value">검색년도선택</label>
+                        <select id="select_value" name="select_value" th:value="${year}">
+                            <option th:selected="${year}==''">년도</option>
+                            <option th:selected="${year}=='2022'">2022</option>
+                            <option th:selected="${year}=='2023'">2023</option>
+                            <option th:selected="${year}=='2024'">2024</option>
+                            <option th:selected="${year}=='2025'">2025</option>
+                        </select>
+                        <label style="display: none;" for="month">검색월선택</label>
+                <select id="month" name="month">
+                            <option value="">전체</option>
+                            <option value="-01" th:selected="${mon}=='-01'">1월</option>
+                            <option value="-02" th:selected="${mon}=='-02'">2월</option>
+                            <option value="-03" th:selected="${mon}=='-03'">3월</option>
+                            <option value="-04" th:selected="${mon}=='-04'">4월</option>
+                            <option value="-05" th:selected="${mon}=='-05'">5월</option>
+                            <option value="-06" th:selected="${mon}=='-06'">6월</option>
+                            <option value="-07" th:selected="${mon}=='-07'">7월</option>
+                            <option value="-08" th:selected="${mon}=='-08'">8월</option>
+                            <option value="-09" th:selected="${mon}=='-09'">9월</option>
+                            <option value="-10" th:selected="${mon}=='-10'">10월</option>
+                            <option value="-11" th:selected="${mon}=='-11'">11월</option>
+                            <option value="-12" th:selected="${mon}=='-12'">12월</option>
+                        </select>
+                        <button type="button" class="btn_basic" onclick="dataSend()">조회</button>
+                    </div>
+                </div>
+
+                <h2 class="mt20 mb10">AR공간 서비스 이용 만족도</h2>
+                <table style="display: inline-table;">
+                <caption style="display: none;">AR공간 서비스 이용 만족도</caption>
+                    <thead>
+                        <tr>
+                        	<th>구분</th>
+                            <th>설문 응답자 수</th>
+                            <th>총 만족도 점수</th>
+                            <th>평균 만족도 점수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td>뮤지컬 도와줘 치로로</td>
+                            <td th:text="${fish}+'명'"></td>
+                            <td th:text="${fishsum}+'점'"></td>
+                            <td><span th:text="${fishav}+'점'"></span><button type="button" class="btn_board ml5" onclick="fishavpopup()">상세보기</button></td>
+                        </tr>
+                        <tr>
+                        <td>뮤지컬 어린왕자</td>
+                            <td th:text="${yg}+'명'"></td>
+                            <td th:text="${ygsum}+'점'"></td>
+                             <td><span th:text="${ygav}+'점'"></span><button type="button" class="btn_board ml5" onclick="ygavpopup()">상세보기</button></td>
+                        </tr>
+                        <tr>
+                        <td>게이미피케이션 도와줘 치로로</td>
+                            <td th:text="${arfish}+'명'"></td>
+                            <td th:text="${arfishsum}+'점'"></td>
+                             <td><span th:text="${arfishav}+'점'"></span><button type="button" class="btn_board ml5" onclick="arfishavpopup()">상세보기</button></td>
+                        </tr>
+                        <tr>
+                        <td>게이미피케이션 어린왕자</td>
+                            <td th:text="${aryg}+'명'"></td>
+                            <td th:text="${arygsum}+'점'"></td>
+                             <td><span th:text="${arygav}+'점'"></span><button type="button" class="btn_board ml5" onclick="arygavpopup()">상세보기</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                
+              
+               
+
+                <h2 class="mt50 mb10">돌봄센터 아동 화상교육 이용 만족도</h2>
+                <table th:style="${all== 0? 'display:none':'display:bolck'}">
+                <caption style="display: none;">돌봄센터 아동 화상교육 이용 만족도</caption>
+                    <thead>
+                        <tr>
+                            <th>설문 응답 센터수</th>
+                            <th>총 만족도 점수</th>
+                            <th>평균 만족도 점수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td th:text="${all}+'곳'"></td>
+                            <td th:text="${sumall}+'점'"></td>
+                           <td><span th:text="${avall}+'점'"></span><button type="button" class="btn_board ml5" onclick="avallpopup()">상세보기</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- 데이터 없을 경우 출력되는 문구 // 위 테이블 display:none; 아래div display:block; -->
+                <div class="data_null" th:style="${all== 0? 'display:bolck':'display:none'}">조회할 데이터가 존재하지 않습니다.</div>
+
+            </div><!-- //area_table -->
+        </div><!-- //inner -->
+
+
+    </div><!-- //section -->
+</body>
+<script>
+function dataSend(){
+	var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+			
+			location.href='dgs'+'?'+'year='+year+month+'&&'+'year1='+year+'&&'+'mon='+month
+			
+}
+
+
+  function fishavpopup() {
+	var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+		window.open('fish_search'+'?'+'year='+year+month+'&&'+'year1='+year+'&&'+'mon='+month,'fish','top=250, left=500, width=1000, height=700, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+	function ygavpopup() {
+		var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+		window.open('yg_search'+'?'+'year='+year+month+'&&'+'year1='+year+'&&'+'mon='+month,'yg','top=250, left=500, width=1000, height=700, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+	function arfishavpopup() {
+		var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+		window.open('arfish_search'+'?'+'year='+year+month+'&&'+'year1='+year+'&&'+'mon='+month,'arfish','top=250, left=500, width=1000, height=700, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+	function arygavpopup() {
+		var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+		window.open('aryg_search'+'?'+'year='+year+month+'&&'+'year1='+year+'&&'+'mon='+month,'aryg','top=250, left=500, width=1000, height=700, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+	function avallpopup() {
+		var s = document.getElementById("select_value")
+		var year = s.options[s.selectedIndex].text
+			
+			var month = $("#month").val()
+		window.open('avall_search'+'?'+'year='+year+month+'&&'+'order='+'TBL_LESSONS.BGNG_DT','avall','top=250, left=500, width=1000, height=650, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+
+</script>
+
+
+
+
+<script>
+	function logOut(){
+		var logout = confirm("로그아웃 하시겠습니까?");
+		if(logout){
+		$.ajax({
+				method: 'POST',
+				url: '/logout'
+				
+
+
+			})
+			location.replace('/login');
+		}
+		else {
+			location.reload();
+		}
+		
+	}
+</script>
+
+</html>

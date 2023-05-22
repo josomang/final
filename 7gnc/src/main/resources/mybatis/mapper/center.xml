@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gnc.dao.CenterDao">
+   <!-- 수업등록 -->
+   <insert id="registerDao">
+      insert into TBL_CENTERS(CENTER_TTL,CENTER_ID,CENTER_UID,CENTER_PSWD,CENTER_MAX_NOPE)
+      values
+      (#{param1},#{param2},#{param3},#{param4},#{param5})
+    </insert>
+    <update id="updateDao">
+    update TBL_CENTERS set CENTER_TTL = #{CENTER_TTL}, CENTER_ID = #{CENTER_ID}, CENTER_UID = #{CENTER_UID},
+     CENTER_PSWD = #{CENTER_PSWD} , CENTER_MAX_NOPE = #{CENTER_MAX_NOPE},UPDT_DT=#{UPDT_DT} where CENTER_ID = #{CENTER_ID}
+    </update>
+    
+    <update id="updateDao2">
+    update TBL_CENTERS set CENTER_TTL = #{CENTER_TTL}, CENTER_ID = #{CENTER_ID}, CENTER_UID = #{CENTER_UID},
+     CENTER_PSWD = #{CENTER_PSWD} , CENTER_MAX_NOPE = #{CENTER_MAX_NOPE},UPDT_DT=#{UPDT_DT},
+     DEL_DT=#{DEL_DT} where CENTER_ID = #{CENTER_ID}
+    </update>
+    
+    <select id="centerListDao" resultType="com.gnc.dto.CenterDto" parameterType="string"> 
+		select CENTER_TTL,CENTER_ID,CENTER_UID from TBL_CENTERS where DEL_DT IS NULL order by CENTER_TTL LIMIT ${pageStart}, ${perPageNum}
+	</select>
+	
+	<select id="centerDao" resultType="com.gnc.dto.CenterDto">
+		select CENTER_TTL,CENTER_ID,CENTER_UID,CENTER_PSWD,CENTER_MAX_NOPE from TBL_CENTERS where CENTER_ID = #{CENTER_ID}
+	</select>
+	
+		<select id="centerNameDao" resultType="com.gnc.dto.CenterDto">
+		select CENTER_TTL,CENTER_UID from TBL_CENTERS where CENTER_ID = #{CENTER_ID}
+	</select>
+	
+	
+<select id="getCount" resultType="int">
+    SELECT count(*) FROM TBL_CENTERS where DEL_DT IS NULL
+</select>
+
+<select id="getSearchCount" resultType="int">
+    SELECT count(*) FROM TBL_CENTERS where CENTER_TTL LIKE CONCAT('%',#{keyword},'%') and DEL_DT IS NULL
+</select>
+
+	<select id="searchDao" resultType="com.gnc.dto.CenterDto">
+		select CENTER_TTL,CENTER_ID,CENTER_UID from TBL_CENTERS where CENTER_TTL LIKE CONCAT('%',#{keyword},'%') and DEL_DT IS NULL order by CENTER_TTL LIMIT ${pageStart}, ${perPageNum}
+	</select>
+	
+	<update id="deleteDao" >
+		 update TBL_CENTERS set DEL_DT = #{DEL_DT} where CENTER_ID = #{CENTER_ID}
+	</update>
+	
+	<insert id="centerLessonsInsert">
+     insert into TBL_LESSON_CENTER(LESSON_ID,CENTER_ID,NOPE) values(#{param1},#{param2},#{param3})
+    </insert>
+    
+    	<select id="centerStatisticsSum" resultType="int">
+		select (sum(DGSTFN_SCORE)/count(DGSTFN_SCORE)) as avg 
+		from TBL_LESSONS LEFT JOIN TBL_LESSON_CENTER ON TBL_LESSONS.LESSON_ID = TBL_LESSON_CENTER.LESSON_ID 
+where END_DT LIKE CONCAT('%',#{LOG_CRT_YMD},'%') and TBL_LESSONS.DEL_DT is null
+	</select>
+	
+	<select id="centerUseStatisticsSum" resultType="int">
+		select (sum(NOPE)/SUM(CENTER_MAX_NOPE))*100 from TBL_LESSONS LEFT JOIN TBL_LESSON_CENTER ON TBL_LESSONS.LESSON_ID = TBL_LESSON_CENTER.LESSON_ID LEFT JOIN TBL_CENTERS ON 
+TBL_LESSON_CENTER.CENTER_ID = TBL_CENTERS.CENTER_ID where END_DT LIKE CONCAT('%',#{LOG_CRT_YMD},'%') and TBL_LESSONS.DEL_DT is null
+	</select>
+	<select id="test" resultType="object">
+		select * from TBL_LESSON_CENTER where DGSTFN_SCORE=90
+	</select>
+	
+	<select id="checkIdDao" resultType="string">
+		select CENTER_ID from tbl_centers where CENTER_ID = #{CENTER_ID}
+	</select>
+	
+	<select id="checkDao" resultType="string">
+		select DEL_DT from tbl_centers where CENTER_ID = #{CENTER_ID}
+	</select>
+	
+	<select id="checkDao2" resultType="string">
+		select distinct LESSON_ID from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID}  and CENTER_ID = #{CENTER_ID} 
+	</select>
+	
+	<select id="checkDao3" resultType="string">
+		select distinct LESSON_ID from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID}
+	</select>
+	
+	<select id="checkDao4" resultType="string">
+		select distinct NOPE from TBL_LESSON_CENTER where LESSON_ID = #{LESSON_ID} and CENTER_ID = #{CENTER_ID} 
+	</select>
+	
+	
+	<update id="updateDao3">
+    update TBL_LESSON_CENTER set  NOPE = #{NOPE}, DGSTFN_SCORE = #{DGSTFN_SCORE}  
+     where LESSON_ID = #{LESSON_ID} and CENTER_ID = #{CENTER_ID}
+    </update>
+    
+    <update id="updateDao4">
+    update TBL_LESSON_CENTER set  DGSTFN_SCORE = #{DGSTFN_SCORE}  
+     where LESSON_ID = #{LESSON_ID} and CENTER_ID = #{CENTER_ID}
+    </update>
+    
+     <update id="updateDao5">
+    update TBL_LESSON_CENTER set  NOPE = #{NOPE}
+     where LESSON_ID = #{LESSON_ID} and CENTER_ID = #{CENTER_ID}
+    </update>
+    
+    <insert id="innsertDao">
+     insert into TBL_LESSON_CENTER(LESSON_ID,CENTER_ID,NOPE,DGSTFN_SCORE) values(#{param1},#{param2},#{param3},#{param4})
+    </insert>
+    
+    <insert id="innsertDa123o">
+     insert into TBL_LESSON_CENTER(LESSON_ID,CENTER_ID,NOPE,DGSTFN_SCORE) values(#{param1},#{param2},#{param3},#{param4})
+    </insert>
+
+</mapper>

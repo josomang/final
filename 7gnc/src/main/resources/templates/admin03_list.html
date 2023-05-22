@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>성남시 공공도서관 AR서비스</title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <link rel="stylesheet" type="text/css" href="css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/board.css" />
+    <link rel="stylesheet" type="text/css" href="css/color.css" />
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css" />
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/date.js"></script>
+    <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="nav">
+        <div class="logo">ADMIN</div>
+         <ul>
+            <li class="on">
+                <input type="checkbox" id="menu01">
+                <label for="menu01">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    화상 교육 참여 인원</label>
+                <ul class="submenu" style="display: block;">
+                    <li><a th:href="@{/admin}">수업목록</a></li>
+                    <li class="on"><a th:href="@{/center}">돌봄센터</a></li>
+                </ul>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">group</span>
+                <a th:href="@{/ar}">AR 공간 이용자 수</a>
+            </li>
+              <li>
+                <span class="material-symbols-outlined">tablet_android</span>
+                <a th:href="@{/device}">AR 디바이스현황</a>
+            </li>
+            <li>
+                <span class="material-symbols-outlined">sentiment_satisfied</span>
+                <a th:href="@{/satisfaction}">이용자 만족도</a>
+            </li>
+            <li>
+                <input type="checkbox" id="menu04">
+                <label for="menu04">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    성과지표통계</label>
+                <ul class="submenu" style="display: block;">
+                   <li><a th:href="@{/statistics}">성과지표통계</a></li>
+                    <li><a th:href="@{/goals}">목표설정</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div><!-- //nav -->
+    <div class="section">
+        <div class="header">
+            <button type="button" onclick="logOut()">로그아웃</button>
+        </div>
+        <div class="inner">
+            <h1>돌봄센터 목록</h1>
+
+            <div class="area_table">
+
+                <div class="tablehead">
+                    <div class="searchbox">
+                        <input type="text" id="keyword" autocomplete="off" placeholder="돌봄센터 명" autofocus />
+                        <label style="display: none;" for="keyword">돌봄센터명</label>
+                        <button type="button" class="btn_basic" onclick="search()">검색</button>
+                    </div>
+                    <div class="btn_area">
+                        <button type="button" class="btn_save" onclick="openpopup()">등록</button>
+                    </div>
+                </div>
+
+                <table>
+                <caption style="display: none;">돌봄센터 목록</caption>
+                    <colgroup>
+                    <col style="width:100px">
+                    <col style="width:auto">
+                    <col style="width:200px">
+                    <col style="width:200px">
+                    <col style="width:200px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>돌봄센터명</th>
+                            <th>센터코드</th>
+                            <th>담당자ID</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tt, iterator: ${center}">
+                            <td th:text="${pageDTO.totalCount - (((pageDTO.page-1) * pageDTO.rowPerPage)+iterator.index)}"></td>
+                            <td><span th:text="${tt.CENTER_TTL}"></span></td>
+                             <td ><span th:text="${tt.CENTER_ID}"></span></td>
+                            <td><span th:text="${tt.CENTER_UID}"></span></td>
+                            <td>
+                                <button type="button" class="btn_basic" th:value="${tt.CENTER_ID}" 
+                                onclick="idSend(this.getAttribute('value'))">수정</button>
+                                <button type="button" class="btn_basic" th:value="${tt.CENTER_ID}"
+                                onclick="deleteSend(this.getAttribute('value'))">삭제</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="paging" th:style="${check== 0? 'display:none':'display:block'}">
+                   <ul class="pagination pagination-sm no-margin pull-right">
+                   <li>
+						<span class="before" th:if="${pageMaker.prev} == true">
+							<a th:href="@{/center(page=${pageMaker.startPage}-1,
+					perPageNum=${pageMaker.cri.perPageNum})}">&laquo;</a>
+						</span>
+						</li>
+						<li>
+						<span class="current" th:each="idx,iterStat : 
+					${#numbers.sequence(pageMaker.startPage,pageMaker.endPage)}"
+							th:classappend="${pageMaker.cri.page} == ${idx} ? active : null">
+							<a th:href="@{/center(page=${idx},perPageNum=${pageMaker.cri.perPageNum})}"
+								th:text="${idx}"></a>
+						</span>
+						</li>
+<li>
+						<span class="next" th:if="${pageMaker.next} == true and 
+					${pageMaker.endPage > 0}">
+							<a th:href="@{/center(page=${pageMaker.endPage}+1,
+					perPageNum=${pageMaker.cri.perPageNum})}">&raquo;</a>
+						</span>
+						</li>
+					</ul>
+                </div>
+
+            </div><!-- //area_table -->
+
+        </div><!-- //inner -->
+
+        
+        
+
+    </div><!-- //section -->
+</body>
+<script th:inline="javascript">
+	// Get the modal
+	let modal = document.getElementsByClassName("popup_layer")[0];
+	let modal2 = document.getElementsByClassName("btn")[0];
+	// Get the <span> element that closes the modal
+	let btn_close = document.getElementsByClassName("btn_close")[0];
+	let btn_close2 = document.getElementsByClassName("btn_delete")[0];
+	
+
+
+	 function openpopup() {
+		window.open('popup-center','center','top=250, left=500, width=1000, height=400, status=no, menubar=no, toolbar=no, resizable=no');
+
+	}
+
+	
+	
+	
+
+	
+	
+	
+	
+	function idSend(CENTER_ID) {
+		
+		
+	window.open('center-update-modal'+'?'+'CENTER_ID='+CENTER_ID, 'update',
+						'top=250, left=500, width=1000, height=400, status=no, menubar=no, toolbar=no, resizable=no');
+	
+
+		}
+
+	function deleteSend(CENTER_ID) {
+		
+		var result = confirm("정말로 삭제하시겠습니까?");
+
+		if (result) {
+			$.ajax({
+				method: 'POST',
+				url: '/center-delete',
+				headers: {'Content-type': 'application/json'},
+				data: CENTER_ID
+			})	
+		setTimeout("location.reload()", 1000);
+		}
+		
+      
+	}
+	
+	function search() {
+		var keyword = $("#keyword").val();
+
+	
+		location.href='center-search'+'?'+'keyword='+keyword
+	
+
+	}
+
+	
+
+</script>
+
+
+
+
+
+
+
+<script>
+	function logOut(){
+		var logout = confirm("로그아웃 하시겠습니까?");
+		if(logout){
+		$.ajax({
+				method: 'POST',
+				url: '/logout'
+				
+
+
+			})
+			location.replace('/login');
+		}
+		else {
+			location.reload();
+		}
+		
+	}
+</script>
+
+</html>
